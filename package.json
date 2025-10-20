@@ -1,0 +1,25 @@
+{
+  "name": "osu-to-spotify",
+  "version": "0.1.0",
+  "description": "Create Spotify playlists from local osu! song collections",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": ["osu", "spotify", "playlist"],
+  "author": "xWass",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "open": "^9.0.0",
+    "spotify-web-api-node": "^5.0.2",
+    "inquirer": "^9.2.7",
+    "osu-db-parser": "^1.0.3"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
