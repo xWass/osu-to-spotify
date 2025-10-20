@@ -1,59 +1,71 @@
 # osu! -> Spotify playlist tool
 
-This CLI scans your local osu! Songs folder, extracts Artist and Title from .osu beatmap files, searches Spotify for matching tracks, and creates a playlist with the found tracks.
+This tool imports an osu! collection into a Spotify playlist.
 
-Setup
+Quick start
 
-1. Copy `.env.example` to `.env` and fill in `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and `SPOTIFY_REDIRECT_URI`.
-2. Create a Spotify app at https://developer.spotify.com/dashboard and add the redirect URI.
+1. Create a Spotify app at https://developer.spotify.com/dashboard and copy your Client ID and Client Secret.
+2. In the project root create a `.env` file containing:
+
+```
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
+```
+
 3. Install dependencies:
 
 ```powershell
 npm install
 ```
 
-## osu! -> Spotify
-
-This small CLI imports an osu! collection into a Spotify playlist.
-
-Requirements
-
-- Node.js 16+
-- A Spotify developer app (client id & secret)
-
-Setup
-
-1. Create a file named `.env` in the project root with these values:
-
-SPOTIFY_CLIENT_ID=your_client_id
-SPOTIFY_CLIENT_SECRET=your_client_secret
-SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
-
-2. Install dependencies:
+4. Run the CLI (collection import is the default flow):
 
 ```powershell
-npm install
+npm start --public
 ```
 
-Run
+Examples
 
-Use the collection flow (default) to pick an osu! collection and create a playlist:
+- Import a collection and use a custom playlist name:
 
 ```powershell
-npm start -- --collection
+npm start --playlist "My osu playlist" --public
 ```
 
-You can also pass `--playlist "Name"` to create a playlist with a specific name and `--public` to make it public.
+Basic guide
 
-Behavior notes
+- The CLI reads osu! data under `%LOCALAPPDATA%\osu!` on Windows. It uses `collection.db` to list collections and `osu!.db` to map md5s to beatmap metadata where possible.
+- When importing a collection the CLI prompts you to choose which collection to import and to confirm before creating a playlist.
+- Authorization uses Spotify's OAuth flow via your browser. After sign-in the CLI continues and creates the playlist.
 
-- The CLI reads `%LOCALAPPDATA%\osu!\collection.db` and `%LOCALAPPDATA%\osu!\osu!.db` to resolve beatmap metadata.
-- It opens a browser to authorize Spotify. After authorization it builds a best-effort match for each entry and creates the playlist.
-- If the local Songs folder is available the tool will try to map md5 hashes to beatmap metadata for better matching.
+In-depth — what the project does
+
+1) Read osu! collection data
+
+- `collection.db` is parsed with `osu-db-parser` to extract collection names and md5 lists.
+- If `osu!.db` is available, it's parsed to look up artist/title for md5s.
+
+2) Local mapping (optional)
+
+- If a local Songs folder exists, the code can scan beatmap files and audio files, compute md5 hashes and parse `.osu` metadata to produce better search strings.
+
+3) Normalize & dedupe
+
+- Parsed strings are normalized (strip extra whitespace, remove bracketed sections, basic punctuation normalization) and deduplicated.
+
+4) Search Spotify and create playlist
+
+- Each normalized entry is searched on Spotify (using `artist:` and `track:` qualifiers with a plain-fallback). Matches are collected and added in batches to a new playlist.
 
 Troubleshooting
 
-- If the tool cannot read collection.db or osu!.db ensure `%LOCALAPPDATA%` or `%USERPROFILE%` are present and the files exist.
-- For Spotify auth issues, verify the redirect URI in your Spotify app matches `SPOTIFY_REDIRECT_URI`.
+- "collection.db not found": verify your osu! files are under `%LOCALAPPDATA%\osu!` or provide the proper environment variables.
+- Spotify auth issues: ensure your Spotify app Redirect URI matches `SPOTIFY_REDIRECT_URI` in `.env`.
+
+Possible improvements
+
+- Add `--songs <path>` to point to a custom Songs folder.
+- Improve matching heuristics and rate-limit handling.
 
 License: MIT
