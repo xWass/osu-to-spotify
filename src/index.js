@@ -12,7 +12,6 @@ program
   .option('--playlist <name>', 'playlist name to create on Spotify')
   .option('--public', 'create public playlist')
   
-  .option('--create-only', 'create playlist without importing collection')
   ;
 
 program.parse(process.argv);

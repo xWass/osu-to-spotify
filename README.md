@@ -58,6 +58,15 @@ In-depth — what the project does
 
 - Each normalized entry is searched on Spotify (using `artist:` and `track:` qualifiers with a plain-fallback). Matches are collected and added in batches to a new playlist.
 
+## Spotify API and account notes
+
+- You must create a Spotify Developer app to obtain a Client ID and Client Secret: https://developer.spotify.com/dashboard
+- The CLI uses the Authorization Code flow and runs a local HTTP listener on port 8888 by default. The default redirect URI is `http://localhost:8888/callback`. Make sure this exact URI is registered in your Spotify app settings.
+- Scopes requested by the CLI (defaults): `playlist-modify-public`, `playlist-modify-private`, `user-read-private`. These allow creating playlists and reading basic account info.
+- After authorization the tool sets the access token and refresh token on the `spotify-web-api-node` client. The code supports refreshing the access token via the refresh token (see `refreshIfNeeded` in `src/spotify_client.js`).
+- The code uses `express` to handle the OAuth callback and `open` (optional) to launch the browser automatically.
+
+
 Troubleshooting
 
 - "collection.db not found": verify your osu! files are under `%LOCALAPPDATA%\osu!` or provide the proper environment variables.
